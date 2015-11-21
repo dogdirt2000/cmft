@@ -149,7 +149,7 @@ namespace cmft
         _out3f[2] = s_faceUvVectors[_faceId][0][2] * _u + s_faceUvVectors[_faceId][1][2] * _v + s_faceUvVectors[_faceId][2][2];
 
         // Normalize.
-        const float invLen = 1.0f/sqrt(_out3f[0]*_out3f[0] + _out3f[1]*_out3f[1] + _out3f[2]*_out3f[2]);
+        const float invLen = 1.0f/sqrtf(_out3f[0]*_out3f[0] + _out3f[1]*_out3f[1] + _out3f[2]*_out3f[2]);
         _out3f[0] *= invLen;
         _out3f[1] *= invLen;
         _out3f[2] *= invLen;
@@ -230,6 +230,55 @@ namespace cmft
         _vec[0] = -sinf(theta)*sinf(phi);
         _vec[1] = cosf(theta);
         _vec[2] = -sinf(theta)*cosf(phi);
+    }
+
+    // Assume normalized _vec.
+    // Output is on [0, 1] for each component
+    static inline void octantFromVec(float& _u, float& _v, const float _vec[3])
+    {
+        // Project the sphere onto the octahedron, and then onto the xy plane.
+        float dot = fabsf(_vec[0]) + fabsf(_vec[1]) + fabsf(_vec[2]);
+        float px = _vec[0] / dot;
+        float py = _vec[2] / dot;
+
+        // Reflect the folds of the lower hemisphere over the diagonals.
+        if (_vec[1] <= 0.0f)
+        {
+            _u = ((1.0f - fabsf(py)) * fsign(px));
+            _v = ((1.0f - fabsf(px)) * fsign(py));
+        }
+        else
+        {
+            _u = px;
+            _v = py;
+        }
+
+        _u = _u * 0.5f + 0.5f;
+        _v = _v * 0.5f + 0.5f;
+    }
+
+    static inline void vecFromOctant(float _vec[3], float _u, float _v)
+    {
+        _u = _u*2.0f - 1.0f;
+        _v = _v*2.0f - 1.0f;
+
+        _vec[1] = 1.0f - fabsf(_u) - fabsf(_v);
+
+        if (_vec[1] < 0.0f)
+        {
+            _vec[0] = (1.0f - fabsf(_v)) * fsign(_u);
+            _vec[2] = (1.0f - fabsf(_u)) * fsign(_v);
+        }
+        else
+        {
+            _vec[0] = _u;
+            _vec[2] = _v;
+        }
+
+        const float invLen = 1.0f/vec3Length(_vec);
+        _vec[0] *= invLen;
+        _vec[1] *= invLen;
+        _vec[2] *= invLen;
     }
 
     /// http://www.mpia-hd.mpg.de/~mathar/public/mathar20051002.pdf

@@ -34,12 +34,11 @@
 
 namespace cmft
 {
-
-#define PI      3.1415926535897932384626433832795028841971693993751058
-#define PI4     12.566370614359172953850573533118011536788677597500423
-#define PI16    50.265482457436691815402294132472046147154710390001693
-#define PI64    201.06192982974676726160917652988818458861884156000677
-#define SQRT_PI 1.7724538509055160272981674833411451827975494561223871
+    #define PI      3.1415926535897932384626433832795028841971693993751058
+    #define PI4     12.566370614359172953850573533118011536788677597500423
+    #define PI16    50.265482457436691815402294132472046147154710390001693
+    #define PI64    201.06192982974676726160917652988818458861884156000677
+    #define SQRT_PI 1.7724538509055160272981674833411451827975494561223871
 
     static inline size_t cubemapNormalSolidAngleSize(uint32_t _cubemapFaceSize)
     {
@@ -1330,8 +1329,8 @@ namespace cmft
         #define CL_CHECK_EXPR_RETURN(_expr) \
             do                              \
             {                               \
-                cl_int err = _expr;         \
-                if (CL_SUCCESS != err)      \
+                cl_int result = _expr;      \
+                if (CL_SUCCESS != result)   \
                 {                           \
                     WARN("OpenCL failed!"); \
                     return false;           \
@@ -1579,17 +1578,17 @@ namespace cmft
                 {
                     for (uint32_t xx = 0; xx < count; ++xx)
                     {
-                        const size_t workOffset[2] = { xx*tileSize, yy*tileSize };
-                        const size_t workSize[2] =
+                        const size_t tileWorkOffset[2] = { xx*tileSize, yy*tileSize };
+                        const size_t tileWorkSize[2] =
                         {
-                            DM_MIN(tileSize, _dstFaceSize-workOffset[0]),
-                            DM_MIN(tileSize, _dstFaceSize-workOffset[1]),
+                            DM_MIN(tileSize, _dstFaceSize-tileWorkOffset[0]),
+                            DM_MIN(tileSize, _dstFaceSize-tileWorkOffset[1]),
                         };
                         CL_CHECK_EXPR_RETURN(clEnqueueNDRangeKernel(m_clContext->m_commandQueue
                                                                   , m_radFilterSingle
                                                                   , 2
-                                                                  , workOffset
-                                                                  , workSize
+                                                                  , tileWorkOffset
+                                                                  , tileWorkSize
                                                                   , NULL
                                                                   , 0
                                                                   , NULL

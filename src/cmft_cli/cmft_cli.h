@@ -6,21 +6,18 @@
 #ifndef CMFT_CMFT_CLI_H_HEADER_GUARD
 #define CMFT_CMFT_CLI_H_HEADER_GUARD
 
-#include <base/config.h>        //INFO, WARN
-#include <base/printcallback.h> //_INFO, _WARN, g_printInfo, g_printWarnings
-#include <base/macros.h>        //countof
+#include <base/config.h>        // INFO, WARN
+#include <base/printcallback.h> // _INFO, _WARN, g_printInfo, g_printWarnings
 
 #include <stdio.h>
 #include <stdint.h>
 
+#include <dm/misc.h>            // DM_PATH_LEN, dm::min, dm::strscpya, dm::ScopeFclose
 #include <bx/commandline.h>
 
 #include <cmft/image.h>
 #include <cmft/cubemapfilter.h>
 #include <cmft/clcontext.h>
-
-
-#include <dm/misc.h> //DM_PATH_LEN, dm::min, dm::strscpya, dm::ScopeFclose
 
 using namespace cmft;
 
@@ -122,6 +119,7 @@ static const CliOptionMap s_validOutputTypes[] =
     { "hstrip",   OutputType::HStrip   },
     { "vstrip",   OutputType::VStrip   },
     { "facelist", OutputType::FaceList },
+    { "octant",   OutputType::Octant   },
     CLI_OPTION_MAP_TERMINATOR,
 };
 
@@ -458,7 +456,7 @@ void inputParametersFromCommandLine(InputParameters& _inputParameters, const bx:
 
                     WARN("Output(%u) - File type %s does not support %s output type."
                          " Valid output types for %s are: %s."
-                         " Choose one of the valid output types or a different file type.\n"
+                         " Choose one of the valid output types or a different file type."
                          , outputId, getFileTypeStr(ft), requestedOutputType
                          , getFileTypeStr(ft), validOutputTypes
                          );
@@ -818,10 +816,10 @@ void printHelp()
             "          <ktx_textureFormat> = [rgb8,rgb16,rgb16f,rgb32f,rgba8,rgba16,rgba16f,rgba32f]\n"
             "          <tga_textureFormat> = [bgr8,bgra8]\n"
             "          <hdr_textureFormat> = [rgbe]\n"
-            "          <dds_outputType> = [cubemap,latlong,hcross,vcross,hstrip,vstrip,facelist]\n"
-            "          <ktx_outputType> = [cubemap,latlong,hcross,vcross,hstrip,vstrip,facelist]\n"
-            "          <tga_outputType> = [latlong,hcross,vcross,hstrip,vstrip,facelist]\n"
-            "          <hdr_outputType> = [latlong,hcross,vcross,hstrip,vstrip,facelist]\n"
+            "          <dds_outputType> = [cubemap,latlong,hcross,vcross,hstrip,vstrip,facelist,octant]\n"
+            "          <ktx_outputType> = [cubemap,latlong,hcross,vcross,hstrip,vstrip,facelist,octant]\n"
+            "          <tga_outputType> = [latlong,hcross,vcross,hstrip,vstrip,facelist,octant]\n"
+            "          <hdr_outputType> = [latlong,hcross,vcross,hstrip,vstrip,facelist,octant]\n"
             "    --silent                           Do not print any output.\n"
 
             "\n"
@@ -864,6 +862,12 @@ int cmftMain(int _argc, char const* const* _argv)
     inputParametersDefault(inputParameters);
     inputParametersFromCommandLine(inputParameters, cmdLine);
 
+    if (0 == inputParameters.m_outputFilesNum)
+    {
+        WARN("There are no valid specified outputs! Execution will not terminate.");
+        return EXIT_FAILURE;
+    }
+
     if (inputParameters.m_silent)
     {
         g_printInfo = false;
@@ -878,7 +882,9 @@ int cmftMain(int _argc, char const* const* _argv)
     // Load image.
     if (0 != strcmp("", inputParameters.m_inputFilePath))
     {
-       imageLoaded = imageLoad(image, inputParameters.m_inputFilePath, TextureFormat::RGBA32F);
+       imageLoaded = imageLoad   (image, inputParameters.m_inputFilePath, TextureFormat::RGBA32F)
+                  || imageLoadStb(image, inputParameters.m_inputFilePath, TextureFormat::RGBA32F)
+                   ;
     }
     else
     {
@@ -938,6 +944,11 @@ int cmftMain(int _argc, char const* const* _argv)
         {
             INFO("Converting vstrip image to cubemap.");
             imageCubemapFromStrip(image);
+        }
+        else if (imageIsOctant(image))
+        {
+            INFO("Converting octant image to cubemap.");
+            imageCubemapFromOctant(image);
         }
         else
         {

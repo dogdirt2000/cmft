@@ -38,9 +38,9 @@ namespace dm
     // Value.
     //-----
 
-    #define DM_MIN(_a, _b) (_a)<(_b)?(_a):(_b)
-    #define DM_MAX(_a, _b) (_a)>(_b)?(_a):(_b)
-    #define DM_CLAMP(_val, _min, _max) DM_MIN(DM_MAX(_val, _min), _max)
+    #define DM_MIN(_a, _b) ((_a)<(_b)?(_a):(_b))
+    #define DM_MAX(_a, _b) ((_a)>(_b)?(_a):(_b))
+    #define DM_CLAMP(_val, _min, _max) (DM_MIN(DM_MAX(_val, _min), _max))
 
     template <typename Ty/*arithmetic type*/>
     DM_INLINE Ty min(Ty _a, Ty _b)
@@ -185,6 +185,8 @@ namespace dm
     #define U_UKB(_size) asKBInt(_size), dm::asKBDec(_size)
     #define U_UMB(_size) asMBInt(_size), dm::asMBDec(_size)
 
+    #define DM_BOOL(_val) (0 != (_val))
+
     DM_INLINE bool toBool(int32_t _v)
     {
         return (0 != _v);
@@ -281,7 +283,7 @@ namespace dm
         return _val - integerPart(_val);
     }
 
-    DM_INLINE bool set(float _flag)
+    DM_INLINE bool isSet(float _flag)
     {
         return (0.0f != _flag);
     }
@@ -395,12 +397,21 @@ namespace dm
 
     #define DM_PATH_LEN 4096
 
+    #if BX_PLATFORM_WINDOWS
+    #   define DM_DIRSLASH "\\"
+    #else
+    #   define DM_DIRSLASH "/"
+    #endif
+
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
-        #else // OSX and Linux.
-            ::realpath(_rel, _abs);
+        #elif BX_PLATFORM_LINUX
+            bx::snprintf(_abs, DM_PATH_LEN, "%s", _rel); //::realpath is not thread-safe on Linux.
+        #else // OSX
+            char* path = ::realpath(_rel, _abs);
+            BX_UNUSED(path);
         #endif // BX_PLATFORM_WINDOWS
     }
 
@@ -408,10 +419,8 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, "\\", DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/", DM_PATH_LEN);
         #endif
     }
 
@@ -419,10 +428,10 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, "\\Desktop\\", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
         #endif
     }
 
@@ -438,30 +447,64 @@ namespace dm
         #endif
     }
 
+    /// '/foo/bar/ ' -> '/foo/bar'. Modifies input string.
+    DM_INLINE char* trimDirPath(char _path[DM_PATH_LEN])
+    {
+        size_t end = strlen(_path);
+        while (--end)
+        {
+            if (_path[end] != ' '
+            &&  _path[end] != '/'
+            &&  _path[end] != '\\'
+            )
+            {
+                _path[end+1] = '\0';
+                break;
+            }
+        }
+        return _path;
+    }
+
+    DM_INLINE uint32_t windowsDrives()
+    {
+    #if BX_PLATFORM_WINDOWS
+        return GetLogicalDrives();
+    #else
+        return 0;
+    #endif // BX_PLATFORM_WINDOWS
+    }
+
     /// Gets file name without extension from file path. Examples:
     ///     /tmp/foo.c -> foo
     ///     C:\\tmp\\foo.c -> foo
     DM_INLINE bool basename(char* _out, size_t _outSize, const char* _filePath)
     {
-       const char *begin;
-       const char *end;
+        const char* begin;
+        const char* end;
 
-       const char *ptr;
-       begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
-             : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
-             : _filePath
-             ;
+        const char* ptr;
+        begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
+              : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
+              : _filePath
+              ;
 
-       end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
+        end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
 
-       if (NULL != begin && NULL != end)
-       {
-           const size_t size = dm::min(size_t(end-begin)+1, _outSize);
-           dm::strscpy(_out, begin, size);
-           return true;
-       }
+        if (NULL != begin && NULL != end)
+        {
+            const size_t size = dm::min(size_t(end-begin)+1, _outSize);
+            dm::strscpy(_out, begin, size);
+            return true;
+        }
 
-       return false;
+        return false;
+    }
+
+    DM_INLINE const char* fileExtension(const char* _filePath)
+    {
+        const char* dot = strrchr(_filePath, '.');
+        const char* ext = (NULL != dot) ? ++dot : _filePath;
+        return ext;
     }
 
     DM_INLINE long int fileExists(const char* _file)

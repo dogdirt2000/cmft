@@ -8,24 +8,22 @@ It reaches very fast processing speeds by utilizing both multi-core CPU and Open
 Download
 --------
 
- * [cmft - Windows 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_win64.zip)<br />
- * [cmft - Windows 32bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_win32.zip)<br />
- * [cmft - Linux 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_lin64.zip)<br />
- * [cmft - Linux 32bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_lin32.zip)<br />
- * [cmft - OSX 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_osx64.zip)<br />
- * [cmft - OSX 32bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_osx32.zip)<br />
+<img src="https://github.com/dariomanesku/cmft-bin/raw/master/res/windows.png" height="16px">  [cmft - Windows 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_win64.zip)<br />
+<img src="https://github.com/dariomanesku/cmft-bin/raw/master/res/linux.png"   height="16px">  [cmft - Linux 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_lin64.zip) (updated: 16. Mar 2015)<br />
+<img src="https://github.com/dariomanesku/cmft-bin/raw/master/res/apple.png"   height="16px">  [cmft - OSX 64bit](https://github.com/dariomanesku/cmft-bin/raw/master/cmft_osx64.zip) (updated: 16. Mar 2015)<br />
+*In case you need 32bit binaries, compile from source.*<br />
 
 
 ![cmft-cover](https://github.com/dariomanesku/cmft/raw/master/res/cmft_cover.jpg)
 
 - Supported input/output formats: \*.dds, \*.ktx, \*.hdr, \*.tga.
-- Supported input/output types: cubemap, cube cross, latlong, face list, horizontal and vertical strip.
+- Supported input/output types: cubemap, cube cross, latlong, face list, horizontal/vertical strip, octant.
 
 
 See it in action - [here](https://github.com/dariomanesku/cmftStudio)
 ------------
 Screenshot from [cmftStudio](https://github.com/dariomanesku/cmftStudio):
-![cmftStudioScreenshot](https://raw.githubusercontent.com/dariomanesku/cmftStudio/master/screenshots/cmftStudio3.jpg)
+![cmftStudioScreenshot](https://raw.githubusercontent.com/dariomanesku/cmftStudio/master/screenshots/cmftStudio_osx0.jpg)
 
 
 Remark !
@@ -46,47 +44,50 @@ Building
 	cd cmft
 	make
 
-- After calling `make`, *\_projects* folder will be created with all supported project files. Deleting *\_projects* folder is safe at any time.<br \>
-- All compiler generated files will be in *\_build* folder. Again, deleting *\_build* folder is safe at any time.<br \>
+- After calling `make`, *\_projects* folder will be created with all supported project files. Deleting *\_projects* folder is safe at any time.
+- All compiler generated files will be in *\_build* folder. Again, deleting *\_build* folder is safe at any time.
 
 ### Windows
 
-- Visual Studio solutions can be found in *\_projects/vs20XX/*.<br \>
+- Visual Studio
+  - Visual Studio solution will be located in *\_projects/vs20XX/*.
+- MinGW
+  - MinGW Makefile will be located in *\_projects/gmake-mingw-gcc/*.
+  - Project can be build from the root directory by running `make mingw-gcc-release64` (or similar).
+- Remember to edit CMFT variable in *runtime/cmft_win.bat* accordingly to match the build configuration you are using.
 
 ### Linux
 
-- Makefile can be found in *\_projects/gmake-linux/*.<br \>
-- Project can be build from the root directory by running `make linux-release64` (or similar).<br \>
-- Vim users can source *.ide.vim* and make use of Build() and Execute() functions from inside Vim.<br \>
-- Remember to edit CMFT variable in *runtime/cmft_lin.sh* accordingly to match the build configuration you are using.<br \>
+- Makefile will be loacted in *\_projects/gmake-linux/*.
+- Project can be build from the root directory by running `make linux-release64` (or similar).
+- Vim users can source *.ide.vim* and make use of Build() and Execute() functions from inside Vim.
+- Remember to edit CMFT variable in *runtime/cmft_lin.sh* accordingly to match the build configuration you are using.
 
 ### OS X
 
 - XCode
-  - XCode solution can be found in *\_projects/xcode4/*.<br \>
-  - XCode project contains one scheme with 4 build configurations (debug/release 32/64bit). Select desired build configuration manually and/or setup schemes manually as desired. In case you need 64bit build, it is possible to just set *Build Settings -> Architectures -> Standard Architectures (64-bit Intel) (x86_64).*<br \>
-  - Also it is probably necessary to manually set runtime directory (it is not picking it from genie for some reason). This is done by going to "*Product -> Scheme -> Edit Scheme... -> Run cmftDebug -> Options -> Working Directory (Use custom working directory)*" and specifying *runtime/* directory from cmft root folder.<br \>
+  - XCode solution will be located in *\_projects/xcode4/*.
+  - XCode project contains one scheme with 4 build configurations (debug/release 32/64bit). Select desired build configuration manually and/or setup schemes manually as desired. In case you need 64bit build, it is possible to just set *Build Settings -> Architectures -> Standard Architectures (64-bit Intel) (x86_64).*
+  - Also it is probably necessary to manually set runtime directory (it is not picking it from genie for some reason). This is done by going to "*Product -> Scheme -> Edit Scheme... -> Run cmftDebug -> Options -> Working Directory (Use custom working directory)*" and specifying *runtime/* directory from cmft root folder.
 - Makefile
-  - Makefile can be found in *\_projects/gmake-osx/*.<br \>
-  - Project can be build from the root directory by running `make osx-release64` (or similar).<br \>
-  <br \>
-- Vim users can source *.ide.vim* and make use of Build() and Execute() functions from inside Vim.<br \>
-- Remember to edit CMFT variable in *runtime/cmft_osx.sh* accordingly to match the build configuration you are using.<br \>
+  - Makefile can be found in *\_projects/gmake-osx/*.
+  - Project can be build from the root directory by running `make osx-release64` (or similar).
+- Vim users can source *.ide.vim* and make use of Build() and Execute() functions from inside Vim.
+- Remember to edit CMFT variable in *runtime/cmft_osx.sh* accordingly to match the build configuration you are using.
 
 ### Other
-- Also other compilation options may be available, have a look inside *\_projects* directory.<br \>
-- File *config.mk* is used for setting environment variables for different compilers.<br \>
-- Additional build configurations will be available in the future. If one is there and not described here in this document, it is probably not yet set up properly and may not work out-of-the-box as expected without some care.<br \>
+- Also other compilation options may be available, have a look inside *\_projects* directory.
+- Additional build configurations will be available in the future. If one is there and not described here in this document, it is probably not yet set up properly and may not work out-of-the-box as expected without some care.
 
 ### Known issues
-- Linux GCC build works but processing on CPU is noticeably slower comparing to Windows build (haven't yet figured out why). OpenCL runs fine.
+- Linux GCC build noticeably slower comparing to Windows build (haven't yet figured out why).
 - PVRTexTool is not properly opening mipmapped \*.ktx files from cmft. This appears to be the problem with the current version of PVRTexTool. Has to be further investigated.
 
 
 Performance
 -----------
 
-cmft was compared with the popular CubeMapGen tool for processing performance.<br \>
+cmft was compared with the popular CubeMapGen tool for processing performance.
 Test machine: Intel i5-3570 @ 3.8ghz, Nvidia GTX 560 Ti 448.
 
 Filter settings:
@@ -115,7 +116,7 @@ Test case #4:
 - Dst face size: 256
 - Lighting model: blinnbrdf
 
-<br />
+
 
 |Test case| CubeMapGen   | cmft Cpu only | cmft Gpu only | cmft  |
 |:--------|:-------------|:--------------|:--------------|:------|
@@ -132,22 +133,22 @@ Test case #4:
 Environment maps
 ------------
 
-- [NoEmotion HDRs](http://noemotionhdrs.net/).<br />
-- [sIBL Archive - Hdrlabs.com](http://www.hdrlabs.com/sibl/archive.html).<br />
+- [NoEmotion HDRs](http://noemotionhdrs.net/).
+- [sIBL Archive - Hdrlabs.com](http://www.hdrlabs.com/sibl/archive.html).
 
 
 Recommended tools
 ------------
 
-- [PVRTexTool](http://community.imgtec.com/developers/powervr/) - for opening \*.dds and \*.ktx files.<br />
-- [GIMP](http://www.gimp.org) - for opening \*.tga files.<br />
-- [Luminance HDR](http://qtpfsgui.sourceforge.net/) - for opening \*.hdr files.<br />
+- [PVRTexTool](http://community.imgtec.com/developers/powervr/) - for opening \*.dds and \*.ktx files.
+- [GIMP](http://www.gimp.org) - for opening \*.tga files.
+- [Luminance HDR](http://qtpfsgui.sourceforge.net/) - for opening \*.hdr files.
 
 
 Similar projects
 ------------
 
-- [CubeMapGen](http://developer.amd.com/tools-and-sdks/archive/legacy-cpu-gpu-tools/cubemapgen/) - A well known tool for cubemap filtering from AMD.<br \>
+- [CubeMapGen](http://developer.amd.com/tools-and-sdks/archive/legacy-cpu-gpu-tools/cubemapgen/) - A well known tool for cubemap filtering from AMD.
 - [Marmoset Skyshop](http://www.marmoset.co/skyshop) - Commercial plugin for Unity3D Game engine.
 - [Knald Lys](https://www.knaldtech.com/lys-open-beta/) - Commercial tool from KnaldTech.
 
@@ -167,6 +168,12 @@ In case you are using cmft for your game/project, please let me know. Tell me yo
 Other than that, everyone is welcome to contribute to cmft by submitting bug reports, feature requests, testing on different platforms, profiling, etc.
 
 When contributing to the cmft project you must agree to the BSD 2-clause licensing terms.
+
+Contributors
+------------
+
+* Mmxix productions ([@mmxix](https://github.com/mmxix/)) - Vstrip image format.
+* [Pierre Lepers](https://twitter.com/_pil_) ([@plepers](https://github.com/plepers)) - Octant image format.
 
 
 Thanks to

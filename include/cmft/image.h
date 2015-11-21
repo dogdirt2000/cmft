@@ -18,9 +18,8 @@
 
 namespace cmft
 {
-
-#define CUBE_FACE_NUM  6
-#define MAX_MIP_NUM   16
+    #define CUBE_FACE_NUM  6
+    #define MAX_MIP_NUM   16
 
     enum ImageTransformArgs
     {
@@ -66,6 +65,7 @@ namespace cmft
             HStrip,
             VStrip,
             FaceList,
+            Octant,
 
             Count,
             Null = -1,
@@ -250,17 +250,21 @@ namespace cmft
     ///
     void imageClamp(Image& _image, bx::AllocatorI* _allocator = g_allocator);
 
-    ///                                .....___.....
-    ///     +------+   ....__.......   .   |   |   .    _________________                           ___     ___
-    ///    /|     /|   .  |  |     .   .___|___|___.   |                 |                         |___|   |   |_
-    ///   +-+----+ |   .__|__|__ __.   |   |   |   |   |                 |    __ __ __ __ __ __    |___|   |___| |_
-    ///   | |    | |   |  |  |  |  |   |___|___|___|   |                 |   |  |  |  |  |  |  |   |___|     |___| |_
-    ///   | +----+-+   |__|__|__|__|   .   |   |   .   |                 |   |__|__|__|__|__|__|   |___|       |___| |_
-    ///   |/     |/    .  |  |     .   .   |___|   .   |_________________|                         |___|         |___| |_
-    ///   +------+     ...|__|......   .   |   |   .                                               |___|           |___| |
-    ///                                ....|___|....                                                                 |___|
+    ///                                .....___....
+    ///     +------+   ....__.......   .   |   |   .    _________________                           ___     ___                _______________
+    ///    /|     /|   .  |  |     .   .___|___|___.   |                 |                         |___|   |   |_             |       .       |
+    ///   +-+----+ |   .__|__|__ __.   |   |   |   |   |                 |    __ __ __ __ __ __    |___|   |___| |_           |    .  .  .    |
+    ///   | |    | |   |  |  |  |  |   |___|___|___|   |                 |   |  |  |  |  |  |  |   |___|     |___| |_         |  .    .    .  |
+    ///   | +----+-+   |__|__|__|__|   .   |   |   .   |                 |   |__|__|__|__|__|__|   |___|       |___| |_       |...............|
+    ///   |/     |/    .  |  |     .   .   |___|   .   |_________________|                         |___|         |___| |_     |  .    .    .  |
+    ///   +------+     ...|__|......   .   |   |   .                                               |___|           |___| |    |    .  .  .    |
+    ///                                ....|___|....                                                                 |___|    |_______._______|
     ///
-    ///    Cubemap        HCross           VCross           Lat Long               HStrip          VStrip     Face list
+    ///    Cubemap        HCross           VCross           Lat Long               HStrip          VStrip     Face list            Octant
+    ///
+    ///  Octant:
+    ///     Octahedron environment maps: http://www.vis.uni-stuttgart.de/~dachsbcn/download/vmvOctaMaps.pdf
+    ///     A survey of efficient representations for independent unit vectors: http://jcgt.org/published/0003/02/01/paper.pdf (page 8. and 9.)
     ///
 
     ///
@@ -276,6 +280,9 @@ namespace cmft
 
     ///
     bool imageIsVStrip(const Image& _image);
+
+    ///
+    bool imageIsOctant(const Image& _image);
 
     ///
     bool imageValidCubemapFaceList(const Image _faceList[6]);
@@ -335,10 +342,25 @@ namespace cmft
     bool imageToCubemap(Image& _image, bx::AllocatorI* _allocator = g_allocator);
 
     ///
+    bool imageOctantFromCubemap(Image& _dst, const Image& _src, bool _useBilinearInterpolation, bx::AllocatorI* _allocator);
+
+    ///
+    bool imageCubemapFromOctant(Image& _dst, const Image& _src, bool _useBilinearInterpolation = true, bx::AllocatorI* _allocator = g_allocator);
+
+    ///
+    bool imageCubemapFromOctant(Image& _image, bool _useBilinearInterpolation = true, bx::AllocatorI* _allocator = g_allocator);
+
+    ///
     bool imageLoad(Image& _image, const char* _filePath, TextureFormat::Enum _convertTo = TextureFormat::Null, bx::AllocatorI* _allocator = g_allocator);
 
     ///
     bool imageLoad(Image& _image, const void* _data, uint32_t _dataSize, TextureFormat::Enum _convertTo = TextureFormat::Null, bx::AllocatorI* _allocator = g_allocator);
+
+    ///
+    bool imageLoadStb(Image& _image, const char* _filePath, TextureFormat::Enum _convertTo = TextureFormat::Null, bx::AllocatorI* _allocator = g_allocator);
+
+    ///
+    bool imageLoadStb(Image& _image, const void* _data, uint32_t _dataSize, TextureFormat::Enum _convertTo = TextureFormat::Null, bx::AllocatorI* _allocator = g_allocator);
 
     ///
     bool imageIsValid(const Image& _image);
